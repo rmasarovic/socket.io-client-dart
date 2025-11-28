@@ -2,7 +2,7 @@
 
 **New Feature:**
 
-- Added withCredentials as an option
+- [#427](https://github.com/rikulo/socket.io-client-dart/pull/427) Added withCredentials as an option
 
 ## 3.1.2
 
