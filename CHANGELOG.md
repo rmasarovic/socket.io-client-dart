@@ -1,3 +1,10 @@
+## 3.1.4
+
+**Bug fix:**
+
+- [#432](https://github.com/rikulo/socket.io-client-dart/pull/432) Fix: #331 Emit Connect_error for Middleware Reject
+- [#434](https://github.com/rikulo/socket.io-client-dart/pull/434) fix: Port incorrectly set to 0 for hostnames with multiple subdomains
+
 ## 3.1.3
 
 **New Feature:**
