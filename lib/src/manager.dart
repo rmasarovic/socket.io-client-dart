@@ -79,13 +79,13 @@ class Manager extends EventEmitter {
   bool? skipReconnect;
 
   Manager({uri, Map? options})
-      : _httpClientAdapter = createPlatformHttpClientAdapter(),
+      : _httpClientAdapter = options?['httpClientAdapter'] ??
+            createPlatformHttpClientAdapter(
+                sourceAddress: options?['sourceAddress']),
         super() {
     options = options ?? <dynamic, dynamic>{};
     options['transportOptions'] = {
-      'websocket': {
-        'httpClientAdapter': options['httpClientAdapter'] ?? _httpClientAdapter
-      },
+      'websocket': {'httpClientAdapter': _httpClientAdapter},
       ...?options['transportOptions'],
     };
 

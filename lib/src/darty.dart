@@ -297,6 +297,15 @@ class OptionBuilder {
     return this;
   }
 
+  /// Sets the source address for outgoing connections.
+  /// This allows binding the socket to a specific local address.
+  /// Only supported on dart:io platform (not web).
+  /// Pass an InternetAddress instance from dart:io.
+  OptionBuilder setSourceAddress(dynamic sourceAddress) {
+    _opts['sourceAddress'] = sourceAddress;
+    return this;
+  }
+
   /// Build the options map.
   Map<String, dynamic> build() => _opts;
 }

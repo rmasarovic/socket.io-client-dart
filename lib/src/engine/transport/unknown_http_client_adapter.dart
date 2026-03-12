@@ -1,6 +1,6 @@
 import 'package:socket_io_client/src/engine/transport/http_client_adapter.dart';
 
-HttpClientAdapter makePlatformHttpClientAdapter() {
+HttpClientAdapter makePlatformHttpClientAdapter({dynamic sourceAddress}) {
   throw UnimplementedError(
       'createPlatformHttpClientAdapter() is not implemented for this platform.');
 }

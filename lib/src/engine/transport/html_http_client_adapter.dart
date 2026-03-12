@@ -8,6 +8,7 @@ class HtmlHttpClientAdapter implements HttpClientAdapter {
   }
 }
 
-HttpClientAdapter makePlatformHttpClientAdapter() {
+HttpClientAdapter makePlatformHttpClientAdapter({dynamic sourceAddress}) {
+  // sourceAddress is not supported in web platform
   return HtmlHttpClientAdapter();
 }
