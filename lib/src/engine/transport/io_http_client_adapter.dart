@@ -2,11 +2,14 @@ import 'dart:io';
 import 'http_client_adapter.dart';
 
 class IOHttpClientAdapter implements HttpClientAdapter {
+  static final HttpClient _sharedHttpClient = HttpClient()
+    ..maxConnectionsPerHost = 1000000;
+
   final HttpClient _httpClient;
   final InternetAddress? sourceAddress;
 
   IOHttpClientAdapter({HttpClient? httpClient, this.sourceAddress})
-      : _httpClient = httpClient ?? HttpClient() {
+      : _httpClient = httpClient ?? _sharedHttpClient {
     if (sourceAddress != null) {
       // Set up IOOverrides to bind to specific source address
       _configureSourceAddress();
