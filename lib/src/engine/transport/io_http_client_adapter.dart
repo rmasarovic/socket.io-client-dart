@@ -5,31 +5,35 @@ class IOHttpClientAdapter implements HttpClientAdapter {
   static final HttpClient _sharedHttpClient = HttpClient()
     ..maxConnectionsPerHost = 1000000;
 
+  /// Cache of source-bound HttpClients keyed by IP address string.
+  /// All adapters with the same sourceAddress share one HttpClient.
+  static final Map<String, HttpClient> _sourceBoundClients = {};
+
   final HttpClient _httpClient;
   final InternetAddress? sourceAddress;
 
   IOHttpClientAdapter({HttpClient? httpClient, this.sourceAddress})
       : _httpClient = httpClient ??
             (sourceAddress != null
-                ? _createSourceBoundHttpClient(sourceAddress)
-                : _sharedHttpClient) {
-    print('[IOHttpClientAdapter] created with sourceAddress: ${sourceAddress?.address ?? "DEFAULT/shared"}');
-  }
+                ? _getOrCreateSourceBoundHttpClient(sourceAddress)
+                : _sharedHttpClient);
 
-  static HttpClient _createSourceBoundHttpClient(InternetAddress sourceAddr) {
-    print('[IOHttpClientAdapter] Creating source-bound HttpClient for ${sourceAddr.address}');
-    return HttpClient()
-      ..maxConnectionsPerHost = 1000000
-      ..connectionFactory = (Uri uri, String? proxyHost, int? proxyPort) {
-        final host = proxyHost ?? uri.host;
-        final port = proxyPort ?? uri.port;
-        print('[IOHttpClientAdapter] connectionFactory: connecting to $host:$port from ${sourceAddr.address}');
-        return Socket.startConnect(
-          host,
-          port,
-          sourceAddress: sourceAddr,
-        );
-      };
+  static HttpClient _getOrCreateSourceBoundHttpClient(InternetAddress sourceAddr) {
+    final key = sourceAddr.address;
+    return _sourceBoundClients.putIfAbsent(key, () {
+      print('[IOHttpClientAdapter] Creating source-bound HttpClient for $key');
+      return HttpClient()
+        ..maxConnectionsPerHost = 1000000
+        ..connectionFactory = (Uri uri, String? proxyHost, int? proxyPort) {
+          final host = proxyHost ?? uri.host;
+          final port = proxyPort ?? uri.port;
+          return Socket.startConnect(
+            host,
+            port,
+            sourceAddress: sourceAddr,
+          );
+        };
+    });
   }
 
   @override

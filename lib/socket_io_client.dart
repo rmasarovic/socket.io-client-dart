@@ -48,23 +48,33 @@ Socket _lookup(uri, opts) {
   opts = opts ?? <dynamic, dynamic>{};
 
   var parsed = Uri.parse(uri);
-  // Include sourceAddress in cache key so each source IP gets its own Manager
+  // Build cache key with sourceAddress so each source IP gets its own Manager
   var sourceAddr = opts['sourceAddress']?.address ?? '';
-  var id = '${parsed.scheme}://${parsed.host}:${parsed.port}${sourceAddr.isNotEmpty ? '#$sourceAddr' : ''}';
-  print('[io.io] _lookup uri=$uri, sourceAddress=$sourceAddr, cacheKey=$id');
+  var baseId = '${parsed.scheme}://${parsed.host}:${parsed.port}';
+  if (sourceAddr.isNotEmpty) {
+    baseId = '$baseId#$sourceAddr';
+  }
   var path = parsed.path;
-  var sameNamespace = cache.containsKey(id) && cache[id].nsps.containsKey(path);
-  var newConnection = opts['forceNew'] == true ||
+
+  var forceNew = opts['forceNew'] == true ||
       opts['force new connection'] == true ||
-      false == opts['multiplex'] ||
-      sameNamespace;
+      false == opts['multiplex'];
 
   late Manager io;
 
-  if (newConnection) {
+  if (forceNew) {
     _logger.fine('ignoring socket cache for $uri');
     io = Manager(uri: uri, options: opts);
   } else {
+    // When sameNamespace is hit, find or create a new Manager slot
+    // instead of creating an uncached throwaway Manager.
+    // This ensures namespace multiplexing works for all clients.
+    var id = baseId;
+    var suffix = 0;
+    while (cache.containsKey(id) && cache[id].nsps.containsKey(path)) {
+      suffix++;
+      id = '$baseId~$suffix';
+    }
     io = cache[id] ??= Manager(uri: uri, options: opts);
   }
   if (parsed.query.isNotEmpty && opts['query'] == null) {

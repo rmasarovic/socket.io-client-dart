@@ -306,6 +306,15 @@ class OptionBuilder {
     return this;
   }
 
+  /// Sets a unique cache identifier for this connection.
+  /// When set, this id is appended to the Manager cache key,
+  /// ensuring each unique cacheId gets its own Manager instance
+  /// with proper namespace multiplexing.
+  OptionBuilder setCacheId(String cacheId) {
+    _opts['cacheId'] = cacheId;
+    return this;
+  }
+
   /// Build the options map.
   Map<String, dynamic> build() => _opts;
 }
