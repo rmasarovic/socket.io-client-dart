@@ -9,16 +9,23 @@ class IOHttpClientAdapter implements HttpClientAdapter {
   final InternetAddress? sourceAddress;
 
   IOHttpClientAdapter({HttpClient? httpClient, this.sourceAddress})
-      : _httpClient = httpClient ?? _sharedHttpClient {
-    if (sourceAddress != null) {
-      // Set up IOOverrides to bind to specific source address
-      _configureSourceAddress();
-    }
-  }
+      : _httpClient = httpClient ??
+            (sourceAddress != null
+                ? _createSourceBoundHttpClient(sourceAddress)
+                : _sharedHttpClient);
 
-  void _configureSourceAddress() {
-    // Override socket connection to use sourceAddress
-    IOOverrides.global = _SourceAddressIOOverrides(sourceAddress!);
+  static HttpClient _createSourceBoundHttpClient(InternetAddress sourceAddr) {
+    return HttpClient()
+      ..maxConnectionsPerHost = 1000000
+      ..connectionFactory = (Uri uri, String? proxyHost, int? proxyPort) {
+        final host = proxyHost ?? uri.host;
+        final port = proxyPort ?? uri.port;
+        return Socket.startConnect(
+          host,
+          port,
+          sourceAddress: sourceAddr,
+        );
+      };
   }
 
   @override
@@ -27,24 +34,6 @@ class IOHttpClientAdapter implements HttpClientAdapter {
       uri,
       headers: headers,
       customClient: _httpClient,
-    );
-  }
-}
-
-final class _SourceAddressIOOverrides extends IOOverrides {
-  final InternetAddress sourceAddress;
-
-  _SourceAddressIOOverrides(this.sourceAddress);
-
-  @override
-  Future<Socket> socketConnect(host, int port,
-      {sourceAddress, int sourcePort = 0, Duration? timeout}) {
-    return Socket.connect(
-      host,
-      port,
-      sourceAddress: this.sourceAddress,
-      sourcePort: sourcePort,
-      timeout: timeout,
     );
   }
 }
