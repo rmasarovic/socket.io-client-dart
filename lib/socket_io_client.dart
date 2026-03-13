@@ -48,7 +48,9 @@ Socket _lookup(uri, opts) {
   opts = opts ?? <dynamic, dynamic>{};
 
   var parsed = Uri.parse(uri);
-  var id = '${parsed.scheme}://${parsed.host}:${parsed.port}';
+  // Include sourceAddress in cache key so each source IP gets its own Manager
+  var sourceAddr = opts['sourceAddress']?.address ?? '';
+  var id = '${parsed.scheme}://${parsed.host}:${parsed.port}${sourceAddr.isNotEmpty ? '#$sourceAddr' : ''}';
   var path = parsed.path;
   var sameNamespace = cache.containsKey(id) && cache[id].nsps.containsKey(path);
   var newConnection = opts['forceNew'] == true ||
