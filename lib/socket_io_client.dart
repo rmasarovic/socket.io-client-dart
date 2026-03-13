@@ -51,6 +51,7 @@ Socket _lookup(uri, opts) {
   // Include sourceAddress in cache key so each source IP gets its own Manager
   var sourceAddr = opts['sourceAddress']?.address ?? '';
   var id = '${parsed.scheme}://${parsed.host}:${parsed.port}${sourceAddr.isNotEmpty ? '#$sourceAddr' : ''}';
+  print('[io.io] _lookup uri=$uri, sourceAddress=$sourceAddr, cacheKey=$id');
   var path = parsed.path;
   var sameNamespace = cache.containsKey(id) && cache[id].nsps.containsKey(path);
   var newConnection = opts['forceNew'] == true ||

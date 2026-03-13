@@ -83,6 +83,7 @@ class Manager extends EventEmitter {
             createPlatformHttpClientAdapter(
                 sourceAddress: options?['sourceAddress']),
         super() {
+    print('[Manager] created for $uri, sourceAddress: ${options?['sourceAddress']}');
     options = options ?? <dynamic, dynamic>{};
     options['transportOptions'] = {
       'websocket': {'httpClientAdapter': _httpClientAdapter},
